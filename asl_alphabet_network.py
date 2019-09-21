@@ -19,7 +19,7 @@ IMAGE_HEIGHT = 200
 def get_model() -> Sequential:
     model = Sequential()
 
-    model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=(1, 200, 200)))
+    model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=(200, 200, 1)))
     model.add(Conv2D(32, kernel_size=3, activation="relu"))
     model.add(Flatten())
     model.add(Dense(26, activation="softmax"))
