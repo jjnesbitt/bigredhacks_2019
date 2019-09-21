@@ -6,6 +6,7 @@ import os
 import shutil
 import click
 import numpy as np
+import time
 
 from PIL import Image, ImageFilter
 from keras.models import Sequential
@@ -32,8 +33,10 @@ def get_model() -> Sequential:
 
 
 def model_train(
-    data_dir, batch_size=None, epochs=1, validation_split=0.0, callbacks=None
-):
+    data_dir, batch_size=None, epochs=1, validation_split=0.0):
+    NAME = "model-v0-{}".format(int(time.time()))
+    tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
+
     files = [f for f in os.listdir(data_dir) if not os.path.isdir(f)]
     np.random.shuffle(files)
 
@@ -52,7 +55,7 @@ def model_train(
         y_train = np.zeros((1, 26))
         y_train[0][ord(f[0]) - 65] = 1
 
-        model.fit(x_train, y_train, batch_size, epochs, validation_split)
+        model.fit(x_train, y_train, batch_size, epochs, validation_split, callbacks = [tensorboard])
 
 
 def model_test(x_test, y_train):
