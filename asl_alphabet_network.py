@@ -3,6 +3,7 @@ import numpy as np
 
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten
+from keras.callbacks import TensorBoard
 
 
 def get_model() -> Sequential:
@@ -18,12 +19,12 @@ def get_model() -> Sequential:
     )
 
 
-def train(x_train, y_train, x_test, y_test):
+def train(x_train, y_train, batch_size=None, epochs=1, validation_split=0.0, callbacks=None):
     model = get_model()
-    model.fit()
+    model.fit(x_train, y_train, batch_size, epochs, validation_split)
 
 
-def test():
+def test(x_test, y_train):
     pass
 
 
