@@ -18,6 +18,7 @@ numpy = "*"
 matplotlib = "*"
 Pillow = "*"
 click = "*"
+tensorflow = "*"
 
 [requires]
 python_version = "3.6"
