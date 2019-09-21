@@ -1,3 +1,9 @@
+import warnings  # NOQA
+
+warnings.simplefilter(action="ignore", category=FutureWarning)  # NOQA
+
+import os
+import shutil
 import click
 import numpy as np
 
@@ -27,22 +33,43 @@ def test():
     pass
 
 
-@click.command()
-@click.option("--train", help="Trains the CNN with the provided training data")
-@click.option("--test", help="Tests the CNN on the provided testing")
-@click.option("--extract-data")
-@click.option("-m", "--model")
-@click.option("--training-data")
-@click.option("--testing-data")
-def main(train, test, model, data_dir):
-    if train:
-        if not data_dir:
-            click.UsageError("Training data directory not specified")
+def extract_data(root):
+    dirs = [os.path.join(root, p) for p in os.listdir(root)]
 
+    for d in dirs:
+        files = os.listdir(d)
+
+        for file in files:
+            dest = os.path.join(root, file)
+            shutil.copyfile(os.path.join(d, file), dest)
+
+
+@click.command()
+@click.option(
+    "--train", is_flag=True, help="Trains the CNN with the provided training data"
+)
+@click.option("--test", is_flag=True, help="Tests the CNN on the provided testing")
+@click.option(
+    "--extract",
+    is_flag=True,
+    help="Runs a script to extract the data into required folder heirarchy",
+)
+@click.option(
+    "-m", "--model", help="The trained model to perform testing or resume training on"
+)
+@click.option("--data-dir", help="The directory containing the data")
+def main(train, test, extract, model, data_dir):
+    if (train or test or extract) and not data_dir:
+        raise click.UsageError("Data directory not specified")
+
+    if train:
         train()
 
     elif test:
         test()
+
+    elif extract:
+        extract_data(data_dir)
 
 
 if __name__ == "__main__":
