@@ -32,8 +32,7 @@ def get_model() -> Sequential:
     return model
 
 
-def model_train(
-    data_dir, batch_size=None, epochs=1, validation_split=0.0):
+def model_train(data_dir, batch_size=None, epochs=1, validation_split=0.0):
     NAME = "model-v0-{}".format(int(time.time()))
     tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
 
@@ -55,7 +54,14 @@ def model_train(
         y_train = np.zeros((1, 26))
         y_train[0][ord(f[0]) - 65] = 1
 
-        model.fit(x_train, y_train, batch_size, epochs, validation_split, callbacks = [tensorboard])
+        model.fit(
+            x_train,
+            y_train,
+            batch_size,
+            epochs,
+            validation_split,
+            callbacks=[tensorboard],
+        )
 
 
 def model_test(x_test, y_train):
