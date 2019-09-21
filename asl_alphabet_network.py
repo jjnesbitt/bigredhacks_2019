@@ -7,9 +7,13 @@ import shutil
 import click
 import numpy as np
 
+from PIL import Image, ImageFilter
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten
 from keras.callbacks import TensorBoard
+
+IMAGE_WIDTH = 200
+IMAGE_HEIGHT = 200
 
 
 def get_model() -> Sequential:
@@ -18,26 +22,42 @@ def get_model() -> Sequential:
     model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=(200, 200, 1)))
     model.add(Conv2D(32, kernel_size=3, activation="relu"))
     model.add(Flatten())
-    model.add(Dense(29, activation="softmax"))
+    model.add(Dense(26, activation="softmax"))
 
     model.compile(
         optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
     )
 
+    return model
 
-def train(x_train, y_train, batch_size=None, epochs=1, validation_split=0.0, callbacks=None):
+
+def model_train(
+    data_dir, batch_size=None, epochs=1, validation_split=0.0, callbacks=None
+):
+    files = os.listdir(data_dir)
+    np.random.shuffle(files)
+
     model = get_model()
-    model.fit(x_train, y_train, batch_size, epochs, validation_split)
+
+    for f in files:
+        path = os.path.join(data_dir, f)
+        image = Image.open(path).filter(ImageFilter.FIND_EDGES)
+        pixels = [(r + g + b) / 3 for (r, g, b) in image.getdata()]
+        x_train = np.array(pixels).reshape(IMAGE_WIDTH, IMAGE_HEIGHT, 1)
+        y_train = f[0]
+
+        model.fit(x_train, y_train, batch_size, epochs, validation_split)
 
 
-def test(x_test, y_train):
+def model_test(x_test, y_train):
     pass
 
 
 def extract_data(root):
-    dirs = [os.path.join(root, p) for p in os.listdir(root)]
+    dirs = [os.path.join(root, p) for p in os.listdir(root) if len(p) == 1]
 
     for d in dirs:
+        print(f"Extracting {d}")
         files = os.listdir(d)
 
         for file in files:
@@ -64,7 +84,7 @@ def main(train, test, extract, model, data_dir):
         raise click.UsageError("Data directory not specified")
 
     if train:
-        train()
+        model_train(data_dir)
 
     elif test:
         test()
