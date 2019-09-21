@@ -34,7 +34,7 @@ def get_model() -> Sequential:
 def model_train(
     data_dir, batch_size=None, epochs=1, validation_split=0.0, callbacks=None
 ):
-    files = os.listdir(data_dir)
+    files = [f for f in os.listdir(data_dir) if not os.path.isdir(f)]
     np.random.shuffle(files)
 
     model = get_model()
@@ -42,9 +42,15 @@ def model_train(
     for f in files:
         path = os.path.join(data_dir, f)
         image = Image.open(path).filter(ImageFilter.FIND_EDGES)
+
+        # Convert to grayscale
         pixels = [(r + g + b) / 3 for (r, g, b) in image.getdata()]
-        x_train = np.array(pixels).reshape(IMAGE_WIDTH, IMAGE_HEIGHT, 1)
-        y_train = f[0]
+
+        # Reshape
+        x_train = np.array(pixels).reshape(1, IMAGE_WIDTH, IMAGE_HEIGHT, 1)
+
+        y_train = np.zeros((1, 26))
+        y_train[0][ord(f[0]) - 65] = 1
 
         model.fit(x_train, y_train, batch_size, epochs, validation_split)
 
@@ -54,9 +60,11 @@ def model_test(x_test, y_train):
 
 
 def extract_data(root):
-    print(root)
-    dirs = [os.path.join(root, p) for p in os.listdir(root) if len(p) == 1 and os.path.isdir(os.path.join(root, p))]
-    print(dirs)
+    dirs = [
+        os.path.join(root, p)
+        for p in os.listdir(root)
+        if len(p) == 1 and os.path.isdir(os.path.join(root, p))
+    ]
     for d in dirs:
         print(f"Extracting {d}")
         files = os.listdir(d)
