@@ -19,7 +19,7 @@ IMAGE_HEIGHT = 200
 def get_model() -> Sequential:
     model = Sequential()
 
-    model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=(200, 200, 1)))
+    model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=(1, 200, 200)))
     model.add(Conv2D(32, kernel_size=3, activation="relu"))
     model.add(Flatten())
     model.add(Dense(26, activation="softmax"))
@@ -54,8 +54,9 @@ def model_test(x_test, y_train):
 
 
 def extract_data(root):
-    dirs = [os.path.join(root, p) for p in os.listdir(root) if len(p) == 1]
-
+    print(root)
+    dirs = [os.path.join(root, p) for p in os.listdir(root) if len(p) == 1 and os.path.isdir(os.path.join(root, p))]
+    print(dirs)
     for d in dirs:
         print(f"Extracting {d}")
         files = os.listdir(d)
@@ -63,6 +64,7 @@ def extract_data(root):
         for file in files:
             dest = os.path.join(root, file)
             shutil.copyfile(os.path.join(d, file), dest)
+        shutil.rmtree(d)
 
 
 @click.command()
