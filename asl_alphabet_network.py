@@ -32,16 +32,13 @@ def get_model() -> Sequential:
     return model
 
 
-
-def model_train(
-    data_dir, batch_size=None, epochs=1, validation_split=0.0):
-    #NAME = "model-v0-{}".format(int(time.time()))
-    #tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
+def model_train(data_dir, batch_size=None, epochs=1, validation_split=0.0):
+    NAME = "model-v0-{}".format(int(time.time()))
+    tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
 
     files = [f for f in os.listdir(data_dir) if not os.path.isdir(f)]
     np.random.shuffle(files)
 
-    #files = files[:int(len(files)/100)]
     model = get_model()
     x_train = []
     y_train = []
@@ -60,19 +57,11 @@ def model_train(
         pixels = [(r + g + b) / 3 for (r, g, b) in image.getdata()]
 
         # Reshape
-        x_train_i = np.array(pixels).reshape(IMAGE_WIDTH, IMAGE_HEIGHT)
+        x_train = np.array(pixels).reshape(1, IMAGE_WIDTH, IMAGE_HEIGHT, 1)
 
-        y_train_i = np.zeros((26))
-        y_train_i[ord(f[0]) - 65] = 1
+        y_train = np.zeros((1, 26))
+        y_train[0][ord(f[0]) - 65] = 1
 
-        x_train.append(x_train_i)
-        y_train.append(y_train_i)
-
-<<<<<<< HEAD
-    x_train = np.reshape(x_train, (-1, IMAGE_WIDTH, IMAGE_HEIGHT, 1))
-    y_train = np.array(y_train)
-    model.fit(x_train, y_train, epochs = 10, callbacks = [mc], validation_split = 0.3, verbose = 1)
-=======
         model.fit(
             x_train,
             y_train,
@@ -81,7 +70,6 @@ def model_train(
             validation_split,
             callbacks=[tensorboard],
         )
->>>>>>> eba7f24972f5bd416539dd7d7d8838c69f7f5e53
 
 
 def model_test(x_test, y_train):
