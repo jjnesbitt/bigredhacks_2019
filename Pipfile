@@ -3,12 +3,21 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
+[pipenv]
+allow_prereleases = true
+
 [dev-packages]
+flake8 = "*"
+black = "*"
+flake8-black = "*"
 
 [packages]
 keras = "*"
+tensorflow-gpu = "*"
 numpy = "*"
 matplotlib = "*"
+Pillow = "*"
+click = "*"
 
 [requires]
 python_version = "3.6"
