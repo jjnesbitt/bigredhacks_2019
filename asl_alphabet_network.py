@@ -11,7 +11,7 @@ import time
 from PIL import Image, ImageFilter
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten
-from keras.callbacks import TensorBoard
+from keras.callbacks import TensorBoard, ModelCheckpoint
 
 IMAGE_WIDTH = 200
 IMAGE_HEIGHT = 200
@@ -34,28 +34,42 @@ def get_model() -> Sequential:
 
 def model_train(
     data_dir, batch_size=None, epochs=1, validation_split=0.0):
-    NAME = "model-v0-{}".format(int(time.time()))
-    tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
+    #NAME = "model-v0-{}".format(int(time.time()))
+    #tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
 
     files = [f for f in os.listdir(data_dir) if not os.path.isdir(f)]
     np.random.shuffle(files)
 
+    #files = files[:int(len(files)/100)]
     model = get_model()
+    x_train = []
+    y_train = []
+    mc = ModelCheckpoint('best_model.h5', monitor='val_loss', mode='min')
 
-    for f in files:
+    for i, f in enumerate(files):
+        if i % int(len(files)/100) == 0:
+            print(f"{100*i / int(len(files))}%")
+
         path = os.path.join(data_dir, f)
+        if os.path.isdir(path):
+            continue
         image = Image.open(path).filter(ImageFilter.FIND_EDGES)
 
         # Convert to grayscale
         pixels = [(r + g + b) / 3 for (r, g, b) in image.getdata()]
 
         # Reshape
-        x_train = np.array(pixels).reshape(1, IMAGE_WIDTH, IMAGE_HEIGHT, 1)
+        x_train_i = np.array(pixels).reshape(IMAGE_WIDTH, IMAGE_HEIGHT)
 
-        y_train = np.zeros((1, 26))
-        y_train[0][ord(f[0]) - 65] = 1
+        y_train_i = np.zeros((26))
+        y_train_i[ord(f[0]) - 65] = 1
 
-        model.fit(x_train, y_train, batch_size, epochs, validation_split, callbacks = [tensorboard])
+        x_train.append(x_train_i)
+        y_train.append(y_train_i)
+
+    x_train = np.reshape(x_train, (-1, IMAGE_WIDTH, IMAGE_HEIGHT, 1))
+    y_train = np.array(y_train)
+    model.fit(x_train, y_train, epochs = 10, callbacks = [mc], validation_split = 0.3, verbose = 1)
 
 
 def model_test(x_test, y_train):
