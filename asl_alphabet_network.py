@@ -60,6 +60,7 @@ def model_train(
         pixels = [(r + g + b) / 3 for (r, g, b) in image.getdata()]
 
         # Reshape
+<<<<<<< HEAD
         x_train_i = np.array(pixels).reshape(IMAGE_WIDTH, IMAGE_HEIGHT)
 
         y_train_i = np.zeros((26))
@@ -73,6 +74,13 @@ def model_train(
     y_train = np.array(y_train)
     model.fit(x_train, y_train, epochs = 10, callbacks = [mc], validation_split = 0.3, verbose = 1)
 =======
+=======
+        x_train = np.array(pixels).reshape(1, IMAGE_WIDTH, IMAGE_HEIGHT, 1)
+
+        y_train = np.zeros((1, 26))
+        y_train[0][ord(f[0]) - 65] = 1
+
+>>>>>>> eba7f24972f5bd416539dd7d7d8838c69f7f5e53
         model.fit(
             x_train,
             y_train,
@@ -81,6 +89,9 @@ def model_train(
             validation_split,
             callbacks=[tensorboard],
         )
+<<<<<<< HEAD
+>>>>>>> eba7f24972f5bd416539dd7d7d8838c69f7f5e53
+=======
 >>>>>>> eba7f24972f5bd416539dd7d7d8838c69f7f5e53
 
 
