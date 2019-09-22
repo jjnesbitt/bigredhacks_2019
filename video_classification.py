@@ -4,6 +4,7 @@ import h5py
 import time
 import sys
 from keras.models import load_model
+import time
 
 # Takes a new_width x new_height crop of the frame from the center
 def crop(frame, new_height, new_width):
@@ -19,15 +20,15 @@ def crop(frame, new_height, new_width):
 
 
 
-
 def continuous_classify(capture, new_model, new_height, new_width):
     while(True):
         success, frame = capture.read()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         frame = crop(frame, new_height, new_width)
         cv2.imshow('video1', frame)
-        prediction = model.predict_classes(np.reshape(frame, (-1, new_height, new_width, 1)))[0]
-        print(chr(prediction+65))
+        prediction = model.predict(np.reshape(frame, (-1, new_height, new_width, 1)))[0]
+        print(prediction)
+        #print(chr(prediction+65))
         if cv2.waitKey(1) == 27:
             break
 
@@ -41,7 +42,7 @@ def setup(fps, model_dir):
     # First setup the capture.
     # Register it and set the fps
     capture = cv2.VideoCapture(0)
-    capture.set(cv2.CAP_PROP_FPS, fps)
+    #capture.set(cv2.CAP_PROP_FPS, fps)
 
     # Next read in the model
     model = load_model(model_dir)
@@ -56,5 +57,10 @@ if __name__ == "__main__":
 
     capture, model = setup(fps, model_dir)
     continuous_classify(capture, model, expected_height, expected_width)
+
+    # model_dir = sys.argv[1]
+    # model = load_model(model_dir)
+    # data_dir = "/home/tom/"
+    # files = [f for f in os.listdir(data_dir) if not os.path.isdir(f)]
 
 
