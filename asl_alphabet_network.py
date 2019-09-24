@@ -10,7 +10,7 @@ import time
 
 from PIL import Image, ImageFilter
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten
+from keras.layers import Dense, Conv2D, Flatten, Dropout
 from keras.callbacks import TensorBoard, ModelCheckpoint
 
 IMAGE_WIDTH = 200
@@ -21,8 +21,10 @@ def get_model() -> Sequential:
     model = Sequential()
 
     model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=(200, 200, 1)))
+    model.add(Dropout(0.05))
     model.add(Conv2D(32, kernel_size=3, activation="relu"))
     model.add(Flatten())
+    model.add(Dropout(0.05))
     model.add(Dense(26, activation="softmax"))
 
     model.compile(
@@ -41,15 +43,15 @@ def model_train(data_dir):
     np.random.shuffle(files)
 
     # subset files
-    files = files[:int(len(files)/1000)]
+    files = files[:int(len(files)/10)]
     model = get_model()
     x_train = []
     y_train = []
-    mc = ModelCheckpoint('best_model_{}.h5'.format(int(time.time())), monitor='val_loss', mode='min')
+    mc = ModelCheckpoint('best_model.h5', monitor='val_loss', mode='min')
 
     for i, f in enumerate(files):
-        # if i % int(len(files)/100) == 0:
-        #     print(f"{100*i / int(len(files))}%")
+        if i % int(len(files)/100) == 0:
+            print(f"{100*i / int(len(files))}%")
 
         path = os.path.join(data_dir, f)
         if os.path.isdir(path):
@@ -71,7 +73,7 @@ def model_train(data_dir):
 
     x_train = np.reshape(x_train, (-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1))
     y_train = np.array(y_train)
-    model.fit(x_train, y_train, epochs = 3, callbacks = [mc], validation_split = 0.2, verbose = 1)
+    model.fit(x_train, y_train, epochs = 8, callbacks = [mc], validation_split = 0.2, verbose = 1)
 
 
 def model_test(x_test, y_train):
