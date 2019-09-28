@@ -103,4 +103,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# stuff specific for this project
 logs/
+best_model_not_working.h5
