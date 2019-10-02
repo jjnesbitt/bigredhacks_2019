@@ -6,6 +6,7 @@ import sys
 from keras.models import load_model
 import time
 
+
 # current version
 # Takes a new_width x new_height crop of the frame from the center
 def crop(frame, new_height, new_width):
@@ -65,4 +66,3 @@ if __name__ == "__main__":
     # model = load_model(model_dir)
     # data_dir = "/home/tom/"
     # files = [f for f in os.listdir(data_dir) if not os.path.isdir(f)]
-
