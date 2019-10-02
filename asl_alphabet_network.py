@@ -21,25 +21,24 @@ def get_model() -> Sequential:
     model = Sequential()
 
     model.add(Conv2D(128, kernel_size=3, activation="relu", input_shape=(200, 200, 1)))
-    #model.add(Dropout(0.2))
-    model.add(MaxPooling2D(pool_size=(2,2)))
+    # model.add(Dropout(0.2))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(128, kernel_size=3, activation="relu")) 
-    #model.add(Dropout(0.2)) 
-    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(Conv2D(128, kernel_size=3, activation="relu"))
+    # model.add(Dropout(0.2))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(64, kernel_size=3, activation="relu"))  
-    #model.add(Dropout(0.2)) 
-    model.add(MaxPooling2D(pool_size=(2,2)))
-    
+    model.add(Conv2D(64, kernel_size=3, activation="relu"))
+    # model.add(Dropout(0.2))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
     model.add(Conv2D(32, kernel_size=3, activation="relu"))
-    #model.add(Dropout(0.2))
-    model.add(MaxPooling2D(pool_size=(2,2)))
+    # model.add(Dropout(0.2))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
 
     model.add(Dense(26, activation="softmax"))
-
 
     model.compile(
         optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
@@ -48,23 +47,22 @@ def get_model() -> Sequential:
     return model
 
 
-
 def model_train(data_dir):
-    #NAME = "model-v0-{}".format(int(time.time()))
-    #tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
+    # NAME = "model-v0-{}".format(int(time.time()))
+    # tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
 
     files = [f for f in os.listdir(data_dir) if not os.path.isdir(f)]
     np.random.shuffle(files)
 
     # subset files
-    files = files[:int(len(files)/5)]
+    files = files[: int(len(files) / 5)]
     model = get_model()
     x_train = []
     y_train = []
-    mc = ModelCheckpoint('best_model.h5', monitor='val_loss', mode='min')
+    mc = ModelCheckpoint("best_model.h5", monitor="val_loss", mode="min")
 
     for i, f in enumerate(files):
-        if i % int(len(files)/100) == 0:
+        if i % int(len(files) / 100) == 0:
             print(f"{100*i / int(len(files))}%")
 
         path = os.path.join(data_dir, f)
@@ -74,7 +72,6 @@ def model_train(data_dir):
 
         # Convert to grayscale
         pixels = [(r + g + b) / 3 for (r, g, b) in image.getdata()]
-
 
         # Reshape
         x_train_i = np.array(pixels).reshape(IMAGE_HEIGHT, IMAGE_WIDTH)
@@ -87,7 +84,9 @@ def model_train(data_dir):
 
     x_train = np.reshape(x_train, (-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1))
     y_train = np.array(y_train)
-    model.fit(x_train, y_train, epochs = 15, callbacks = [mc], validation_split = 0.2, verbose = 1)
+    model.fit(
+        x_train, y_train, epochs=15, callbacks=[mc], validation_split=0.2, verbose=1
+    )
 
 
 def model_test(x_test, y_train):
