@@ -13,6 +13,8 @@ from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D  # Dropout
 from keras.callbacks import ModelCheckpoint
 
+from typing import Tuple
+
 IMAGE_WIDTH = 200
 IMAGE_HEIGHT = 200
 
@@ -49,7 +51,9 @@ def get_model() -> Sequential:
     return model
 
 
-def recommended_generator_params(data_dir, min_batch_size=32, basic=True):
+def recommended_generator_params(
+    data_dir: str, min_batch_size: int = 32, basic: bool = True
+):
     """
     Tries to determine the lowest batch size that evenly divides the number of samples
     in data_dir, starting at min_batch_size.
@@ -72,7 +76,9 @@ def recommended_generator_params(data_dir, min_batch_size=32, basic=True):
     return (batch_size, length / batch_size)
 
 
-def training_data_generator(data_dir, batch_size=32):
+def training_data_generator(
+    data_dir: str, batch_size: int = 32
+) -> Tuple[np.array, np.array]:
     """Provides the training_data in the form of a generator"""
 
     files = [f for f in os.listdir(data_dir) if not os.path.isdir(f)]
@@ -105,7 +111,7 @@ def training_data_generator(data_dir, batch_size=32):
         yield (x_train, y_train)
 
 
-def model_train(data_dir):
+def model_train(data_dir: str) -> None:
     """Trains the model"""
 
     model = get_model()
@@ -131,12 +137,12 @@ def model_train(data_dir):
     )
 
 
-def model_test(x_test, y_train):
+def model_test(x_test, y_train) -> None:
     """Tests the model."""
     pass
 
 
-def extract_data(root):
+def extract_data(root: str) -> None:
     """
     Extracts into the root directory each folder containing
     test data for a particular ASL letter.
@@ -171,7 +177,7 @@ def extract_data(root):
     "-m", "--model", help="The trained model to perform testing or resume training on"
 )
 @click.option("--data-dir", help="The directory containing the data")
-def main(train, test, extract, model, data_dir):
+def main(train, test, extract, model, data_dir) -> None:
     if (train or test or extract) and not data_dir:
         raise click.UsageError("Data directory not specified")
 
