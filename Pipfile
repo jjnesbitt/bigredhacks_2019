@@ -13,12 +13,11 @@ flake8-black = "*"
 
 [packages]
 keras = "*"
-tensorflow-gpu = "*"
 numpy = "*"
 matplotlib = "*"
 Pillow = "*"
 click = "*"
-tensorflow = "*"
+opencv-python = "*"
 
 [requires]
 python_version = "3.6"
