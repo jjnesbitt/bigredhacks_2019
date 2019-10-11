@@ -9,7 +9,7 @@ import numpy as np
 import time
 
 from PIL import Image, ImageFilter
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
 from keras.callbacks import TensorBoard, ModelCheckpoint
 
@@ -90,8 +90,36 @@ def model_train(data_dir):
     model.fit(x_train, y_train, epochs = 15, callbacks = [mc], validation_split = 0.2, verbose = 1)
 
 
-def model_test(x_test, y_train):
-    pass
+def model_test(model_dir, data_dir):
+    model = load_model(model_dir)
+    files = [f for f in os.listdir(data_dir) if not os.path.isdir(f)]
+    num_correct = 0
+    missed = []
+
+    for i, f in enumerate(files):
+        path = os.path.join(data_dir, f)
+        image = Image.open(path)
+
+        # Convert to grayscale
+        pixels = [(r + g + b) / 3 for (r, g, b) in image.getdata()]
+        
+        # Reshape
+        x_test_i = np.array(pixels).reshape(IMAGE_HEIGHT, IMAGE_WIDTH)
+
+        # Now test
+        prediction = model.predict_classes(np.reshape(x_test_i, (-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1)))[0]
+        predicted_letter = chr(prediction + 65)
+        correct_letter = f[0]
+        if predicted_letter == correct_letter:
+            num_correct += 1
+        else:
+            tup = (predicted_letter, correct_letter)
+            missed.append(tup)
+
+    print("Percent Correct: {:.2f}".format(100 * num_correct / len(files)))
+    for (predicted_letter, correct_letter) in missed:
+        print("Incorrectly predicted a(n) {} as a(n) {}".format(correct_letter, predicted_letter))
+    
 
 
 def extract_data(root):
@@ -124,7 +152,8 @@ def extract_data(root):
     "-m", "--model", help="The trained model to perform testing or resume training on"
 )
 @click.option("--data-dir", help="The directory containing the data")
-def main(train, test, extract, model, data_dir):
+@click.option("--model-path", help="The path to the model")
+def main(train, test, extract, model, data_dir, model_path):
     if (train or test or extract) and not data_dir:
         raise click.UsageError("Data directory not specified")
 
@@ -132,7 +161,7 @@ def main(train, test, extract, model, data_dir):
         model_train(data_dir)
 
     elif test:
-        test()
+        model_test(model_path, data_dir)
 
     elif extract:
         extract_data(data_dir)
